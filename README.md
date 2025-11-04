@@ -320,3 +320,9 @@ For personal use only. Ensure compliance with Time Doctor's Terms of Service and
 **Questions?** Check the log file: `/Users/apple/tdoctorscraper/timedoctor_mcp.log`
 
 **Working?** Ask Claude: "Get my Time Doctor data for today"
+
+## Support
+
+If this tool saves you time, consider buying me a coffee! ☕
+
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support-yellow?style=for-the-badge&logo=buy-me-a-coffee)](https://buymeacoffee.com/frifster)
