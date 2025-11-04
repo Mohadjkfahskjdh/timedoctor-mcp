@@ -7,7 +7,7 @@ from .parser import TimeDocorParser
 from .scraper import TimeDocorScraper
 from .transformer import TimeDocorTransformer, export_to_csv, get_hours_summary
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 __author__ = "Time Doctor Scraper"
 
 __all__ = [

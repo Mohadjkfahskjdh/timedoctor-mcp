@@ -14,13 +14,26 @@ import mcp.server.stdio
 from mcp.server import Server
 from mcp.types import EmbeddedResource, ImageContent, TextContent, Tool
 
-from .parser import TimeDocorParser
-from .scraper import TimeDocorScraper
-from .transformer import (
-    TimeDocorTransformer,
-    entries_to_csv_string,
-    get_hours_summary,
-)
+# Handle both package import and direct execution
+try:
+    from .parser import TimeDocorParser
+    from .scraper import TimeDocorScraper
+    from .transformer import (
+        TimeDocorTransformer,
+        entries_to_csv_string,
+        entries_to_json_string,
+        get_hours_summary,
+    )
+except ImportError:
+    # Fallback for direct execution
+    from parser import TimeDocorParser
+    from scraper import TimeDocorScraper
+    from transformer import (
+        TimeDocorTransformer,
+        entries_to_csv_string,
+        entries_to_json_string,
+        get_hours_summary,
+    )
 
 # Configure logging
 # Get the directory where this script is located
@@ -75,7 +88,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="export_weekly_csv",
-            description="Get time tracking data for ANY date range in CSV format. Works with any number of days (1 day, 7 days, 30 days, etc). Returns CSV data as text that you can save or analyze. Uses single login session for efficiency.",
+            description="Get time tracking data for ANY date range in CSV or JSON format. Works with any number of days (1 day, 7 days, 30 days, etc). Returns data as text that you can save or analyze. Uses single login session for efficiency.",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -86,6 +99,12 @@ async def list_tools() -> list[Tool]:
                     "end_date": {
                         "type": "string",
                         "description": "End date in YYYY-MM-DD format (e.g., 2025-01-21). Can be any date, any range length.",
+                    },
+                    "format": {
+                        "type": "string",
+                        "enum": ["csv", "json"],
+                        "description": "Output format: 'csv' for CSV format (default) or 'json' for JSON format with summary",
+                        "default": "csv",
                     },
                 },
                 "required": ["start_date", "end_date"],
@@ -230,13 +249,16 @@ async def handle_get_daily_report(arguments: dict) -> list[TextContent]:
 
 
 async def handle_export_weekly_csv(arguments: dict) -> list[TextContent]:
-    """Handle export_weekly_csv tool call - returns CSV data as text."""
+    """Handle export_weekly_csv tool call - returns CSV or JSON data as text."""
     try:
         # Normalize dates
         start_date = normalize_date(arguments["start_date"])
         end_date = normalize_date(arguments["end_date"])
+        output_format = arguments.get("format", "csv").lower()
 
-        logger.info(f"Getting date range report from {start_date} to {end_date} in SINGLE SESSION")
+        logger.info(
+            f"Getting date range report from {start_date} to {end_date} in {output_format.upper()} format"
+        )
 
         # Get scraper instance
         td_scraper = await get_scraper()
@@ -257,30 +279,42 @@ async def handle_export_weekly_csv(arguments: dict) -> list[TextContent]:
         # Aggregate by task
         all_entries = parser.aggregate_by_task(all_entries)
 
-        # Generate CSV string
-        csv_data = entries_to_csv_string(all_entries, include_total=True)
-
         # Calculate stats
         transformed = transformer.transform_entries(all_entries)
         total_hours = transformer.calculate_total(transformed)
-
-        response = f"Time Doctor Report: {start_date} to {end_date}\n"
-        response += "=" * 60 + "\n\n"
-        response += f"Days Retrieved: {len(all_reports)}\n"
-        response += f"Total Entries: {len(all_entries)}\n"
-        response += f"Total Hours: {total_hours:.2f}\n\n"
-
-        # Add summary by project
         summary = transformer.get_hours_summary(transformed)
-        response += "Hours by Project:\n"
-        for project, hours in sorted(summary.items()):
-            response += f"  {project}: {hours:.2f} hours\n"
 
-        response += "\n" + "=" * 60 + "\n\n"
-        response += "CSV Data:\n\n"
-        response += csv_data
+        # Generate output based on format
+        if output_format == "json":
+            # JSON format - cleaner output
+            json_data = entries_to_json_string(all_entries, include_total=True, indent=2)
 
-        logger.info(f"Successfully generated date range report ({len(all_entries)} entries)")
+            response = f"Time Doctor Report: {start_date} to {end_date} (JSON)\n"
+            response += "=" * 60 + "\n\n"
+            response += json_data
+
+        else:
+            # CSV format (default) - with summary header
+            csv_data = entries_to_csv_string(all_entries, include_total=True)
+
+            response = f"Time Doctor Report: {start_date} to {end_date}\n"
+            response += "=" * 60 + "\n\n"
+            response += f"Days Retrieved: {len(all_reports)}\n"
+            response += f"Total Entries: {len(all_entries)}\n"
+            response += f"Total Hours: {total_hours:.2f}\n\n"
+
+            # Add summary by project
+            response += "Hours by Project:\n"
+            for project, hours in sorted(summary.items()):
+                response += f"  {project}: {hours:.2f} hours\n"
+
+            response += "\n" + "=" * 60 + "\n\n"
+            response += "CSV Data:\n\n"
+            response += csv_data
+
+        logger.info(
+            f"Successfully generated {output_format.upper()} date range report ({len(all_entries)} entries)"
+        )
         return [TextContent(type="text", text=response)]
 
     except Exception as e:

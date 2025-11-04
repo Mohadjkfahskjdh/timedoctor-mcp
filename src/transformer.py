@@ -4,6 +4,7 @@ Transforms parsed time tracking data to CSV format
 """
 
 import csv
+import json
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -291,6 +292,44 @@ def entries_to_csv_string(entries: list[dict], include_total: bool = True) -> st
         writer.writerow(total_row)
 
     return output.getvalue()
+
+
+def entries_to_json_string(entries: list[dict], include_total: bool = True, indent: int = 2) -> str:
+    """
+    Convert entries to JSON string format (for MCP server output).
+
+    Args:
+        entries: List of parsed time entries (raw format)
+        include_total: Whether to include total_hours field
+        indent: JSON indentation level (default: 2, None for compact)
+
+    Returns:
+        str: JSON formatted string
+    """
+    transformer = TimeDocorTransformer()
+
+    # Transform entries
+    transformed = transformer.transform_entries(entries)
+
+    # Sort by date
+    transformed = transformer.sort_entries(transformed, sort_by="Date")
+
+    # Create output structure
+    output_data = {
+        "entries": transformed,
+        "count": len(transformed),
+    }
+
+    # Add total if requested
+    if include_total and transformed:
+        total_hours = transformer.calculate_total(transformed)
+        output_data["total_hours"] = total_hours
+
+        # Also add summary by project
+        summary = transformer.get_hours_summary(transformed)
+        output_data["summary_by_project"] = summary
+
+    return json.dumps(output_data, indent=indent, ensure_ascii=False)
 
 
 def get_hours_summary(entries: list[dict]) -> dict[str, float]:

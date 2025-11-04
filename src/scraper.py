@@ -10,6 +10,56 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from playwright.async_api import Browser, BrowserContext, Page, async_playwright
+from tenacity import (
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+)
+
+# Handle both package import and direct execution
+try:
+    from .cache import ReportCache
+    from .constants import (
+        BROWSER_DEFAULT_TIMEOUT_MS,
+        BROWSER_USER_AGENT,
+        BROWSER_VIEWPORT_HEIGHT,
+        BROWSER_VIEWPORT_WIDTH,
+        CONTENT_LOAD_WAIT_MS,
+        DATE_NAVIGATION_WAIT_MS,
+        EMAIL_SELECTOR_TIMEOUT_MS,
+        EXPAND_ALL_WAIT_MS,
+        LOGIN_FORM_LOAD_WAIT_MS,
+        LOGIN_NAVIGATION_TIMEOUT_MS,
+        MAX_RETRY_ATTEMPTS,
+        PAGE_LOAD_TIMEOUT_MS,
+        POST_LOGIN_WAIT_MS,
+        REPORT_PAGE_LOAD_WAIT_MS,
+        RETRY_MAX_WAIT_SECONDS,
+        RETRY_MIN_WAIT_SECONDS,
+        RETRY_MULTIPLIER,
+    )
+except ImportError:
+    from cache import ReportCache
+    from constants import (
+        BROWSER_DEFAULT_TIMEOUT_MS,
+        BROWSER_USER_AGENT,
+        BROWSER_VIEWPORT_HEIGHT,
+        BROWSER_VIEWPORT_WIDTH,
+        CONTENT_LOAD_WAIT_MS,
+        DATE_NAVIGATION_WAIT_MS,
+        EMAIL_SELECTOR_TIMEOUT_MS,
+        EXPAND_ALL_WAIT_MS,
+        LOGIN_FORM_LOAD_WAIT_MS,
+        LOGIN_NAVIGATION_TIMEOUT_MS,
+        MAX_RETRY_ATTEMPTS,
+        PAGE_LOAD_TIMEOUT_MS,
+        POST_LOGIN_WAIT_MS,
+        REPORT_PAGE_LOAD_WAIT_MS,
+        RETRY_MAX_WAIT_SECONDS,
+        RETRY_MIN_WAIT_SECONDS,
+        RETRY_MULTIPLIER,
+    )
 
 # Load environment variables from the project directory
 # Get the directory where this script is located
@@ -40,29 +90,42 @@ class TimeDocorScraper:
         self.password = os.getenv("TD_PASSWORD")
         self.base_url = os.getenv("TD_BASE_URL", "https://2.timedoctor.com")
         self.headless = os.getenv("HEADLESS", "true").lower() == "true"
-        self.timeout = int(os.getenv("BROWSER_TIMEOUT", "30000"))
+        self.timeout = int(os.getenv("BROWSER_TIMEOUT", str(BROWSER_DEFAULT_TIMEOUT_MS)))
 
         self.browser: Browser | None = None
         self.context: BrowserContext | None = None
         self.page: Page | None = None
         self.playwright = None
 
+        # Initialize cache
+        self.cache = ReportCache()
+        self.use_cache = os.getenv("USE_CACHE", "true").lower() == "true"
+
         # Validate credentials
         if not self.email or not self.password:
             raise ValueError("TD_EMAIL and TD_PASSWORD must be set in .env file")
 
         logger.info(f"TimeDocorScraper initialized with email: {self.email}")
+        logger.info(f"Cache {'enabled' if self.use_cache else 'disabled'}")
 
+    @retry(
+        stop=stop_after_attempt(MAX_RETRY_ATTEMPTS),
+        wait=wait_exponential(
+            multiplier=RETRY_MULTIPLIER, min=RETRY_MIN_WAIT_SECONDS, max=RETRY_MAX_WAIT_SECONDS
+        ),
+        retry=retry_if_exception_type(Exception),
+        reraise=True,
+    )
     async def start_browser(self):
-        """Start the Playwright browser instance."""
+        """Start the Playwright browser instance with retry logic."""
         try:
             self.playwright = await async_playwright().start()
             self.browser = await self.playwright.chromium.launch(
                 headless=self.headless, args=["--no-sandbox", "--disable-setuid-sandbox"]
             )
             self.context = await self.browser.new_context(
-                viewport={"width": 1920, "height": 1080},
-                user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+                viewport={"width": BROWSER_VIEWPORT_WIDTH, "height": BROWSER_VIEWPORT_HEIGHT},
+                user_agent=BROWSER_USER_AGENT,
             )
             self.page = await self.context.new_page()
             self.page.set_default_timeout(self.timeout)
@@ -86,9 +149,17 @@ class TimeDocorScraper:
         except Exception as e:
             logger.error(f"Error closing browser: {e}")
 
+    @retry(
+        stop=stop_after_attempt(MAX_RETRY_ATTEMPTS),
+        wait=wait_exponential(
+            multiplier=RETRY_MULTIPLIER, min=RETRY_MIN_WAIT_SECONDS, max=RETRY_MAX_WAIT_SECONDS
+        ),
+        retry=retry_if_exception_type(Exception),
+        reraise=True,
+    )
     async def login(self) -> bool:
         """
-        Login to Time Doctor web interface.
+        Login to Time Doctor web interface with retry logic.
 
         Returns:
             bool: True if login successful, False otherwise
@@ -98,12 +169,14 @@ class TimeDocorScraper:
 
             # Navigate to login page
             login_url = f"{self.base_url}/login"
-            await self.page.goto(login_url, wait_until="load", timeout=60000)
+            await self.page.goto(login_url, wait_until="load", timeout=PAGE_LOAD_TIMEOUT_MS)
             logger.debug(f"Navigated to {login_url}")
 
             # Wait for login form to load
-            await self.page.wait_for_timeout(2000)
-            await self.page.wait_for_selector('input[type="email"]', timeout=10000)
+            await self.page.wait_for_load_state("networkidle", timeout=LOGIN_FORM_LOAD_WAIT_MS)
+            await self.page.wait_for_selector(
+                'input[type="email"]', timeout=EMAIL_SELECTOR_TIMEOUT_MS
+            )
 
             # Fill in email
             await self.page.fill('input[type="email"]', self.email)
@@ -118,14 +191,16 @@ class TimeDocorScraper:
 
             # Wait for navigation to complete after clicking login
             try:
-                async with self.page.expect_navigation(wait_until="load", timeout=30000):
+                async with self.page.expect_navigation(
+                    wait_until="load", timeout=LOGIN_NAVIGATION_TIMEOUT_MS
+                ):
                     await self.page.click('button[type="submit"]')
                 logger.debug("Navigation after login completed")
             except Exception as nav_error:
                 logger.warning(f"Navigation wait failed: {nav_error}, checking URL anyway...")
 
-            # Additional wait for any post-login processing
-            await self.page.wait_for_timeout(3000)
+            # Wait for post-login processing
+            await self.page.wait_for_load_state("networkidle", timeout=POST_LOGIN_WAIT_MS)
 
             current_url = self.page.url
             logger.debug(f"Current URL after login attempt: {current_url}")
@@ -201,7 +276,7 @@ class TimeDocorScraper:
                     )
 
                     if not left_arrow:
-                        logger.warning(f"Could not find left arrow button on iteration {i+1}")
+                        logger.warning(f"Could not find left arrow button on iteration {i + 1}")
                         break
 
                     # Check if button is disabled
@@ -212,10 +287,12 @@ class TimeDocorScraper:
 
                     # Click the arrow
                     await left_arrow.click()
-                    logger.debug(f"Clicked left arrow ({i+1}/{days_diff})")
+                    logger.debug(f"Clicked left arrow ({i + 1}/{days_diff})")
 
                     # Wait for page to update
-                    await self.page.wait_for_timeout(1500)
+                    await self.page.wait_for_load_state(
+                        "networkidle", timeout=DATE_NAVIGATION_WAIT_MS
+                    )
             else:
                 # Need to go forward in time (click right arrow)
                 days_forward = abs(days_diff)
@@ -227,7 +304,7 @@ class TimeDocorScraper:
                     )
 
                     if not right_arrow:
-                        logger.warning(f"Could not find right arrow button on iteration {i+1}")
+                        logger.warning(f"Could not find right arrow button on iteration {i + 1}")
                         break
 
                     # Check if button is disabled
@@ -240,10 +317,12 @@ class TimeDocorScraper:
 
                     # Click the arrow
                     await right_arrow.click()
-                    logger.debug(f"Clicked right arrow ({i+1}/{days_forward})")
+                    logger.debug(f"Clicked right arrow ({i + 1}/{days_forward})")
 
                     # Wait for page to update
-                    await self.page.wait_for_timeout(1500)
+                    await self.page.wait_for_load_state(
+                        "networkidle", timeout=DATE_NAVIGATION_WAIT_MS
+                    )
 
             # Verify we reached the target date
             date_button = await self.page.query_selector('button:has-text(", 20")')
@@ -254,9 +333,17 @@ class TimeDocorScraper:
         except Exception as e:
             logger.error(f"Error navigating to date {target_date}: {e}", exc_info=True)
 
+    @retry(
+        stop=stop_after_attempt(MAX_RETRY_ATTEMPTS),
+        wait=wait_exponential(
+            multiplier=RETRY_MULTIPLIER, min=RETRY_MIN_WAIT_SECONDS, max=RETRY_MAX_WAIT_SECONDS
+        ),
+        retry=retry_if_exception_type(Exception),
+        reraise=True,
+    )
     async def get_daily_report_html(self, date: str, navigate_to_report: bool = True) -> str:
         """
-        Get the HTML content of daily report page.
+        Get the HTML content of daily report page with retry logic and caching.
 
         Args:
             date: Date in YYYY-MM-DD format
@@ -267,14 +354,21 @@ class TimeDocorScraper:
             str: HTML content of the report page
         """
         try:
+            # Check cache first
+            if self.use_cache:
+                cached_html = self.cache.get(date)
+                if cached_html:
+                    logger.info(f"Using cached report for {date}")
+                    return cached_html
+
             logger.info(f"Fetching daily report for {date}")
 
             # Navigate to Projects & Tasks report if needed
             if navigate_to_report:
                 report_url = f"{self.base_url}/projects-report"
-                await self.page.goto(report_url, wait_until="load", timeout=60000)
+                await self.page.goto(report_url, wait_until="load", timeout=PAGE_LOAD_TIMEOUT_MS)
                 logger.debug(f"Navigated to {report_url}")
-                await self.page.wait_for_timeout(3000)
+                await self.page.wait_for_load_state("networkidle", timeout=REPORT_PAGE_LOAD_WAIT_MS)
             else:
                 logger.debug("Already on report page, skipping navigation")
 
@@ -287,16 +381,20 @@ class TimeDocorScraper:
                 if expand_button:
                     await expand_button.click()
                     logger.debug("Clicked Expand All button")
-                    await self.page.wait_for_timeout(2000)
+                    await self.page.wait_for_load_state("networkidle", timeout=EXPAND_ALL_WAIT_MS)
             except Exception as e:
                 logger.warning(f"Could not click Expand All: {e}")
 
             # Wait for content to fully load
-            await self.page.wait_for_timeout(2000)
+            await self.page.wait_for_load_state("domcontentloaded", timeout=CONTENT_LOAD_WAIT_MS)
 
             # Get page HTML
             html_content = await self.page.content()
             logger.info(f"Successfully retrieved report HTML ({len(html_content)} bytes)")
+
+            # Cache the result
+            if self.use_cache:
+                self.cache.set(date, html_content)
 
             return html_content
 
