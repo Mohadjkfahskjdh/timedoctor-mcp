@@ -22,9 +22,39 @@ Fetches time tracking reports from Time Doctor and returns them as CSV data. Int
 - 📦 Aggregates duplicate tasks
 - ✅ Includes TOTAL row
 
-## Quick Setup
+## Installation Methods
 
-### 1. Clone & Install
+### Option A: Using uvx (Easiest - No Installation Required)
+
+**Note:** This method will be available once the package is published to PyPI. For now, use Option B.
+
+The simplest way to use Time Doctor MCP is with `uvx`, which runs the server directly from PyPI without manual installation:
+
+**Claude Desktop/Code:**
+```json
+{
+  "mcpServers": {
+    "timedoctor": {
+      "command": "uvx",
+      "args": ["timedoctor-mcp"],
+      "env": {
+        "TD_EMAIL": "your-email@example.com",
+        "TD_PASSWORD": "your-password",
+        "TD_BASE_URL": "https://2.timedoctor.com",
+        "HEADLESS": "true"
+      }
+    }
+  }
+}
+```
+
+**Prerequisites:**
+- Install uv: `brew install uv` (macOS) or see [uv installation](https://docs.astral.sh/uv/)
+- Install Playwright browsers: `uvx --with playwright playwright install chromium`
+
+**That's it!** No cloning, no virtual environments, no setup scripts. Just add the configuration and restart your AI assistant.
+
+### Option B: Clone & Install (For Development)
 
 ```bash
 # Clone the repository
@@ -131,7 +161,25 @@ nano ~/.cursor/mcp.json
 notepad %USERPROFILE%\.cursor\mcp.json
 ```
 
-Add this configuration:
+**Using uvx (easiest):**
+```json
+{
+  "mcpServers": {
+    "timedoctor": {
+      "command": "uvx",
+      "args": ["timedoctor-mcp"],
+      "env": {
+        "TD_EMAIL": "your-email@example.com",
+        "TD_PASSWORD": "your-password",
+        "TD_BASE_URL": "https://2.timedoctor.com",
+        "HEADLESS": "true"
+      }
+    }
+  }
+}
+```
+
+**Using local installation (for development):**
 ```json
 {
   "mcpServers": {
@@ -167,7 +215,26 @@ nano ~/.gemini/settings.json
 notepad %USERPROFILE%\.gemini\settings.json
 ```
 
-Add this configuration:
+**Using uvx (easiest):**
+```json
+{
+  "mcpServers": {
+    "timedoctor": {
+      "command": "uvx",
+      "args": ["timedoctor-mcp"],
+      "env": {
+        "TD_EMAIL": "your-email@example.com",
+        "TD_PASSWORD": "your-password",
+        "TD_BASE_URL": "https://2.timedoctor.com",
+        "HEADLESS": "true"
+      },
+      "timeout": 600000
+    }
+  }
+}
+```
+
+**Using local installation (for development):**
 ```json
 {
   "mcpServers": {
@@ -207,7 +274,26 @@ nano .vscode/mcp.json
 - Linux: `~/.config/Code/User/mcp.json`
 - Windows: `%APPDATA%\Code\User\mcp.json`
 
-Add this configuration:
+**Using uvx (easiest):**
+```json
+{
+  "servers": {
+    "timedoctor": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["timedoctor-mcp"],
+      "env": {
+        "TD_EMAIL": "your-email@example.com",
+        "TD_PASSWORD": "your-password",
+        "TD_BASE_URL": "https://2.timedoctor.com",
+        "HEADLESS": "true"
+      }
+    }
+  }
+}
+```
+
+**Using local installation (for development):**
 ```json
 {
   "servers": {
@@ -226,7 +312,7 @@ Add this configuration:
 }
 ```
 
-**Using .env file (more secure):**
+**Using .env file with local installation:**
 ```json
 {
   "servers": {
