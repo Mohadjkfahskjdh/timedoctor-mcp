@@ -11,7 +11,6 @@ Before reaching out for support, please check the following resources:
 - **[README.md](README.md)** - Installation, setup, and usage instructions
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Development setup and contribution guidelines
 - **[GitHub Issues](https://github.com/frifster/timedoctor-mcp/issues)** - Known issues and bug reports
-- **[GitHub Discussions](https://github.com/frifster/timedoctor-mcp/discussions)** - Community discussions and Q&A
 
 ### Common Issues
 
@@ -47,7 +46,7 @@ If you encounter a bug or have a feature request:
 
 ## Contact
 
-For questions, support requests, or feedback that don't fit into GitHub Issues or Discussions:
+For questions, support requests, or feedback that don't fit into GitHub Issues:
 
 **Email:** [frifster2014@gmail.com](mailto:frifster2014@gmail.com)
 
@@ -57,7 +56,7 @@ Please include the following in your email:
 - Steps you've already tried
 - Relevant log excerpts (if applicable)
 
-**Note:** Response times may vary. For faster responses on common issues, please use GitHub Issues or Discussions where the community can help.
+**Note:** Response times may vary. For faster responses on common issues, please use GitHub Issues where the community can help.
 
 ## Security Issues
 
@@ -85,7 +84,6 @@ Your support helps maintain and improve this project. Thank you! ☕
 
 - **GitHub Repository:** [frifster/timedoctor-mcp](https://github.com/frifster/timedoctor-mcp)
 - **Issues:** [Report bugs or request features](https://github.com/frifster/timedoctor-mcp/issues)
-- **Discussions:** [Ask questions and share ideas](https://github.com/frifster/timedoctor-mcp/discussions)
 
 ---
 
