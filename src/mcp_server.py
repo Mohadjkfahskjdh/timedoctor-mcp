@@ -14,9 +14,9 @@ import mcp.server.stdio
 from mcp.server import Server
 from mcp.types import EmbeddedResource, ImageContent, TextContent, Tool
 
-from parser import TimeDocorParser
-from scraper import TimeDocorScraper
-from transformer import (
+from .parser import TimeDocorParser
+from .scraper import TimeDocorScraper
+from .transformer import (
     TimeDocorTransformer,
     entries_to_csv_string,
     get_hours_summary,
