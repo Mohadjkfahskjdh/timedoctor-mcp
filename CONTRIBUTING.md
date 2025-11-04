@@ -362,8 +362,8 @@ When adding a new feature:
 
 If you have questions:
 - Check the [README.md](README.md) for documentation
-- Open a [Discussion](https://github.com/frifster/timedoctor-mcp/discussions) on GitHub
 - Create an [Issue](https://github.com/frifster/timedoctor-mcp/issues) for bugs or feature requests
+- Email [frifster2014@gmail.com](mailto:frifster2014@gmail.com) for general questions
 
 ## Recognition
 
