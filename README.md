@@ -353,11 +353,16 @@ timedoctor-mcp/
 ├── .env.example            # Example configuration
 ├── requirements.txt        # Python dependencies
 ├── setup-with-uv.sh       # Setup script
-└── src/
-    ├── scraper.py         # Browser automation & login
-    ├── parser.py          # HTML parsing (Angular Material tree)
-    ├── transformer.py     # CSV formatting
-    └── mcp_server.py      # MCP server with 4 tools
+├── src/
+│   ├── scraper.py         # Browser automation & login
+│   ├── parser.py          # HTML parsing (Angular Material tree)
+│   ├── transformer.py     # CSV formatting
+│   └── mcp_server.py      # MCP server with 4 tools
+└── tests/
+    ├── debug_login.py     # Login debugging tool
+    ├── test_parser.py     # HTML parsing tests
+    ├── test_date_navigation.py  # Date navigation tests
+    └── test_complete_flow.py    # End-to-end tests
 ```
 
 ## Troubleshooting
@@ -455,17 +460,17 @@ Make sure all paths in your MCP config are **absolute paths**, not relative:
 **Test login:**
 ```bash
 source .venv/bin/activate  # or .venv\Scripts\activate on Windows
-python debug_login.py
+python tests/debug_login.py
 ```
 
 **Test parsing:**
 ```bash
-python test_parser.py
+python tests/test_parser.py
 ```
 
 **Test complete flow:**
 ```bash
-python test_complete_flow.py
+python tests/test_complete_flow.py
 ```
 
 **View logs:**
