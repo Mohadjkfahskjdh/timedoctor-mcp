@@ -136,6 +136,19 @@ class TimeDocorScraper:
             self.page.set_default_timeout(self.timeout)
             logger.info("Browser started successfully")
         except Exception as e:
+            error_msg = str(e)
+            # Check if this is a missing browser executable error
+            if "Executable doesn't exist" in error_msg or "playwright install" in error_msg:
+                helpful_msg = (
+                    "\n\n" + "=" * 60 + "\n"
+                    "ERROR: Playwright browser not installed!\n\n"
+                    "Please run this command to install Chromium:\n"
+                    "  uvx --with playwright playwright install chromium\n\n"
+                    "This is a one-time setup that downloads the browser binaries.\n"
+                    "=" * 60 + "\n"
+                )
+                logger.error(helpful_msg)
+                raise RuntimeError(helpful_msg) from e
             logger.error(f"Failed to start browser: {e}")
             raise
 

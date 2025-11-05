@@ -47,8 +47,13 @@ The simplest way to use Time Doctor MCP is with `uvx`, which automatically downl
 ```
 
 **Prerequisites:**
-- Install uv: `brew install uv` (macOS) or see [uv installation](https://docs.astral.sh/uv/)
-- Install Playwright browsers: `uvx --with playwright playwright install chromium`
+1. Install uv: `brew install uv` (macOS) or see [uv installation](https://docs.astral.sh/uv/)
+2. Install Playwright browsers (one-time setup):
+   ```bash
+   uvx --with playwright playwright install chromium
+   ```
+
+   This downloads the Chromium browser binaries needed for web scraping (~130MB). You only need to run this once.
 
 **That's it!** No cloning, no virtual environments, no setup scripts. Just add the configuration and restart your AI assistant.
 
@@ -462,6 +467,21 @@ Common issues:
 - ❌ **Missing credentials:** Add to `.env` or MCP config
 - ❌ **Wrong Python path:** Use `.venv/bin/python` (or `.venv/Scripts/python.exe` on Windows)
 - ❌ **Dependencies not installed:** Run `./setup-with-uv.sh`
+- ❌ **Playwright browsers not installed:** Run `uvx --with playwright playwright install chromium`
+
+### Playwright Browser Error
+
+If you see:
+```
+Error: BrowserType.launch: Executable doesn't exist at .../chromium_headless_shell-1187/chrome-mac/headless_shell
+```
+
+**Solution:**
+```bash
+uvx --with playwright playwright install chromium
+```
+
+This is a one-time setup that downloads the browser binaries (~130MB). You only need to run this once per system.
 
 ### Login Fails
 

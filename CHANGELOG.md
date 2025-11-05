@@ -5,6 +5,20 @@ All notable changes to Time Doctor MCP will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2025-11-05
+
+### Fixed
+- **Playwright Browser Installation**: Added clear error message when browser binaries are missing
+  - Detects "Executable doesn't exist" error and shows installation command
+  - Helpful message directs users to run: `uvx --with playwright playwright install chromium`
+  - Prevents confusing errors for first-time uvx users
+
+### Documentation
+- **README Improvements**: Enhanced Playwright browser installation instructions
+  - Clarified one-time setup requirement (~130MB download)
+  - Added dedicated troubleshooting section for Playwright browser errors
+  - Added explicit step in Prerequisites section with clear commands
+
 ## [1.2.0] - 2025-11-05
 
 ### Added
