@@ -9,12 +9,12 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-from scraper import TimeDocorScraper
+from scraper import TimeDoctorScraper
 
 
 async def test_login():
     """Test login with visible browser."""
-    scraper = TimeDocorScraper()
+    scraper = TimeDoctorScraper()
 
     print(f"Email: {scraper.email}")
     print(f"Password: {'*' * len(scraper.password) if scraper.password else 'NOT SET'}")

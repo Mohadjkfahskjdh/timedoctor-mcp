@@ -16,20 +16,20 @@ from mcp.types import EmbeddedResource, ImageContent, TextContent, Tool
 
 # Handle both package import and direct execution
 try:
-    from .parser import TimeDocorParser
-    from .scraper import TimeDocorScraper
+    from .parser import TimeDoctorParser
+    from .scraper import TimeDoctorScraper
     from .transformer import (
-        TimeDocorTransformer,
+        TimeDoctorTransformer,
         entries_to_csv_string,
         entries_to_json_string,
         get_hours_summary,
     )
 except ImportError:
     # Fallback for direct execution
-    from parser import TimeDocorParser
-    from scraper import TimeDocorScraper
+    from parser import TimeDoctorParser
+    from scraper import TimeDoctorScraper
     from transformer import (
-        TimeDocorTransformer,
+        TimeDoctorTransformer,
         entries_to_csv_string,
         entries_to_json_string,
         get_hours_summary,
@@ -56,15 +56,15 @@ app = Server("timedoctor-scraper")
 
 # Global instances
 scraper = None
-parser = TimeDocorParser()
-transformer = TimeDocorTransformer()
+parser = TimeDoctorParser()
+transformer = TimeDoctorTransformer()
 
 
-async def get_scraper() -> TimeDocorScraper:
+async def get_scraper() -> TimeDoctorScraper:
     """Get or create scraper instance."""
     global scraper
     if scraper is None:
-        scraper = TimeDocorScraper()
+        scraper = TimeDoctorScraper()
     return scraper
 
 

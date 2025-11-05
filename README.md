@@ -498,7 +498,7 @@ Login failed - still on login page
 
 **The scraper logs which email it's using:**
 ```
-TimeDocorScraper initialized with email: your-email@example.com
+TimeDoctorScraper initialized with email: your-email@example.com
 ```
 
 ### No Data Returned

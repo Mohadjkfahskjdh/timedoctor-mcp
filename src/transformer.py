@@ -20,7 +20,7 @@ output_dir = project_dir / "output"
 output_dir.mkdir(exist_ok=True)
 
 
-class TimeDocorTransformer:
+class TimeDoctorTransformer:
     """
     Transforms Time Doctor data to CSV format.
     Handles formatting, aggregation, and export.
@@ -28,7 +28,7 @@ class TimeDocorTransformer:
 
     def __init__(self):
         """Initialize the transformer."""
-        logger.info("TimeDocorTransformer initialized")
+        logger.info("TimeDoctorTransformer initialized")
 
     def seconds_to_decimal_hours(self, seconds: int) -> float:
         """
@@ -234,7 +234,7 @@ def export_to_csv(entries: list[dict], output_file: str, include_total: bool = T
     Returns:
         str: Path to the created CSV file
     """
-    transformer = TimeDocorTransformer()
+    transformer = TimeDoctorTransformer()
 
     # Transform entries
     transformed = transformer.transform_entries(entries)
@@ -259,7 +259,7 @@ def entries_to_csv_string(entries: list[dict], include_total: bool = True) -> st
     """
     import io
 
-    transformer = TimeDocorTransformer()
+    transformer = TimeDoctorTransformer()
 
     # Transform entries
     transformed = transformer.transform_entries(entries)
@@ -306,7 +306,7 @@ def entries_to_json_string(entries: list[dict], include_total: bool = True, inde
     Returns:
         str: JSON formatted string
     """
-    transformer = TimeDocorTransformer()
+    transformer = TimeDoctorTransformer()
 
     # Transform entries
     transformed = transformer.transform_entries(entries)
@@ -346,7 +346,7 @@ def get_hours_summary(entries: list[dict]) -> dict[str, float]:
     Returns:
         Dict[str, float]: Project to hours mapping
     """
-    transformer = TimeDocorTransformer()
+    transformer = TimeDoctorTransformer()
 
     # Transform entries
     transformed = transformer.transform_entries(entries)
@@ -388,5 +388,5 @@ if __name__ == "__main__":
 
     # Get summary
     summary = get_hours_summary(sample_entries)
-    transformer = TimeDocorTransformer()
+    transformer = TimeDoctorTransformer()
     print("\n" + transformer.format_summary_text(summary))

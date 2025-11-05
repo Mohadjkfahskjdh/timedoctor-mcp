@@ -5,6 +5,16 @@ All notable changes to Time Doctor MCP will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.4] - 2025-11-05
+
+### Fixed
+- **Fixed Typo in Class Names**: Corrected misspelling "TimeDocor" → "TimeDoctor" throughout codebase
+  - `TimeDocorScraper` → `TimeDoctorScraper`
+  - `TimeDocorParser` → `TimeDoctorParser`
+  - `TimeDocorTransformer` → `TimeDoctorTransformer`
+  - Updated all files: source code, tests, examples, and documentation
+  - No functionality changes, purely cosmetic fix for consistency
+
 ## [1.2.3] - 2025-11-05
 
 ### Changed

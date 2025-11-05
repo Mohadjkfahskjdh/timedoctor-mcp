@@ -4,14 +4,14 @@ Test parallel scraping performance vs sequential scraping.
 
 import asyncio
 import time
-from src.scraper import TimeDocorScraper
-from src.parser import TimeDocorParser
+from src.scraper import TimeDoctorScraper
+from src.parser import TimeDoctorParser
 
 
 async def test_sequential():
     """Test sequential scraping (current method)."""
-    scraper = TimeDocorScraper()
-    parser = TimeDocorParser()
+    scraper = TimeDoctorScraper()
+    parser = TimeDoctorParser()
 
     try:
         print("=" * 60)
@@ -53,8 +53,8 @@ async def test_sequential():
 
 async def test_parallel():
     """Test parallel scraping (new method)."""
-    scraper = TimeDocorScraper()
-    parser = TimeDocorParser()
+    scraper = TimeDoctorScraper()
+    parser = TimeDoctorParser()
 
     try:
         print("\n" + "=" * 60)

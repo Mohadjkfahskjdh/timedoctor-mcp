@@ -5,8 +5,8 @@ Test parallel scraping with RECENT dates to show the performance benefit.
 import asyncio
 import time
 from datetime import datetime, timedelta
-from src.scraper import TimeDocorScraper
-from src.parser import TimeDocorParser
+from src.scraper import TimeDoctorScraper
+from src.parser import TimeDoctorParser
 
 
 async def test_recent_dates():
@@ -33,8 +33,8 @@ async def test_recent_dates():
         shutil.rmtree(".cache")
 
     # Test sequential
-    scraper1 = TimeDocorScraper()
-    parser = TimeDocorParser()
+    scraper1 = TimeDoctorScraper()
+    parser = TimeDoctorParser()
 
     try:
         print("=" * 60)
@@ -74,7 +74,7 @@ async def test_recent_dates():
     await asyncio.sleep(3)
 
     # Test parallel
-    scraper2 = TimeDocorScraper()
+    scraper2 = TimeDoctorScraper()
 
     try:
         print("\n" + "=" * 60)

@@ -131,12 +131,12 @@ USE_CACHE=true           # Enable caching (helps parallel a lot)
 
 ```python
 import asyncio
-from src.scraper import TimeDocorScraper
-from src.parser import TimeDocorParser
+from src.scraper import TimeDoctorScraper
+from src.parser import TimeDoctorParser
 
 async def fetch_last_week():
-    scraper = TimeDocorScraper()
-    parser = TimeDocorParser()
+    scraper = TimeDoctorScraper()
+    parser = TimeDoctorParser()
 
     try:
         await scraper.start_browser()

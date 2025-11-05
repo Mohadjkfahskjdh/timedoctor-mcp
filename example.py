@@ -13,9 +13,9 @@ import os
 # Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
-from scraper import TimeDocorScraper
-from parser import TimeDocorParser
-from transformer import export_to_csv, get_hours_summary, TimeDocorTransformer
+from scraper import TimeDoctorScraper
+from parser import TimeDoctorParser
+from transformer import export_to_csv, get_hours_summary, TimeDoctorTransformer
 
 
 async def example_1_daily_report():
@@ -24,9 +24,9 @@ async def example_1_daily_report():
     print("EXAMPLE 1: Get Today's Time Tracking Report")
     print("="*60 + "\n")
 
-    scraper = TimeDocorScraper()
-    parser = TimeDocorParser()
-    transformer = TimeDocorTransformer()
+    scraper = TimeDoctorScraper()
+    parser = TimeDoctorParser()
+    transformer = TimeDoctorTransformer()
 
     try:
         # Get today's date
@@ -71,8 +71,8 @@ async def example_2_export_csv():
     print("EXAMPLE 2: Export Today's Report to CSV")
     print("="*60 + "\n")
 
-    scraper = TimeDocorScraper()
-    parser = TimeDocorParser()
+    scraper = TimeDoctorScraper()
+    parser = TimeDoctorParser()
 
     try:
         # Get today's date
@@ -116,9 +116,9 @@ async def example_3_weekly_report():
     print("EXAMPLE 3: Export Weekly Report (Last 7 Days)")
     print("="*60 + "\n")
 
-    scraper = TimeDocorScraper()
-    parser = TimeDocorParser()
-    transformer = TimeDocorTransformer()
+    scraper = TimeDoctorScraper()
+    parser = TimeDoctorParser()
+    transformer = TimeDoctorTransformer()
 
     try:
         # Calculate date range (last 7 days)
@@ -175,9 +175,9 @@ async def example_4_hours_summary():
     print("EXAMPLE 4: Quick Hours Summary")
     print("="*60 + "\n")
 
-    scraper = TimeDocorScraper()
-    parser = TimeDocorParser()
-    transformer = TimeDocorTransformer()
+    scraper = TimeDoctorScraper()
+    parser = TimeDoctorParser()
+    transformer = TimeDoctorTransformer()
 
     try:
         # Get today's date

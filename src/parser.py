@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 logger = logging.getLogger(__name__)
 
 
-class TimeDocorParser:
+class TimeDoctorParser:
     """
     Parser for Time Doctor HTML content.
     Extracts time tracking entries from various report pages.
@@ -19,7 +19,7 @@ class TimeDocorParser:
 
     def __init__(self):
         """Initialize the parser."""
-        logger.info("TimeDocorParser initialized")
+        logger.info("TimeDoctorParser initialized")
 
     def parse_daily_report(self, html: str, date: str) -> list[dict]:
         """
@@ -526,7 +526,7 @@ if __name__ == "__main__":
     </table>
     """
 
-    parser = TimeDocorParser()
+    parser = TimeDoctorParser()
     entries = parser.parse_daily_report(sample_html, "2025-01-15")
 
     for entry in entries:

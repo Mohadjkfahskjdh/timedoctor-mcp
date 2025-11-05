@@ -214,11 +214,11 @@ Place test files in the `tests/` directory.
 **Example test structure:**
 ```python
 import asyncio
-from scraper import TimeDocorScraper
+from scraper import TimeDoctorScraper
 
 async def test_new_feature():
     """Test description."""
-    scraper = TimeDocorScraper()
+    scraper = TimeDoctorScraper()
     # Test implementation
     assert result == expected
 

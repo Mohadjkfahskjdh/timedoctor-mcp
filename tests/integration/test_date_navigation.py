@@ -12,12 +12,12 @@ sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from datetime import datetime, timedelta
 
-from scraper import TimeDocorScraper
+from scraper import TimeDoctorScraper
 
 
 async def test_date_navigation():
     """Test navigating to different dates."""
-    scraper = TimeDocorScraper()
+    scraper = TimeDoctorScraper()
 
     try:
         # Start browser (set HEADLESS=false in .env to see browser)

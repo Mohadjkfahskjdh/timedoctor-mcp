@@ -83,7 +83,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-class TimeDocorScraper:
+class TimeDoctorScraper:
     """
     Web scraper for Time Doctor time tracking platform.
     Uses Playwright for browser automation and authentication.
@@ -110,7 +110,7 @@ class TimeDocorScraper:
         if not self.email or not self.password:
             raise ValueError("TD_EMAIL and TD_PASSWORD must be set in .env file")
 
-        logger.info(f"TimeDocorScraper initialized with email: {self.email}")
+        logger.info(f"TimeDoctorScraper initialized with email: {self.email}")
         logger.info(f"Cache {'enabled' if self.use_cache else 'disabled'}")
 
     @retry(
@@ -823,7 +823,7 @@ if __name__ == "__main__":
     import asyncio
 
     async def main():
-        scraper = TimeDocorScraper()
+        scraper = TimeDoctorScraper()
 
         # Get today's report
         today = datetime.now().strftime("%Y-%m-%d")

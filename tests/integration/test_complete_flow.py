@@ -16,9 +16,9 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-from parser import TimeDocorParser
-from scraper import TimeDocorScraper
-from transformer import TimeDocorTransformer, export_to_csv
+from parser import TimeDoctorParser
+from scraper import TimeDoctorScraper
+from transformer import TimeDoctorTransformer, export_to_csv
 
 
 async def test_complete_flow():
@@ -26,9 +26,9 @@ async def test_complete_flow():
     print("\nTest: Complete End-to-End Flow")
     print("=" * 60)
 
-    scraper = TimeDocorScraper()
-    parser = TimeDocorParser()
-    transformer = TimeDocorTransformer()
+    scraper = TimeDoctorScraper()
+    parser = TimeDoctorParser()
+    transformer = TimeDoctorTransformer()
 
     try:
         # Test with last 3 days
@@ -115,7 +115,7 @@ async def test_single_day():
     print("\nTest: Single Day")
     print("=" * 60)
 
-    scraper = TimeDocorScraper()
+    scraper = TimeDoctorScraper()
 
     try:
         yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
@@ -143,7 +143,7 @@ async def test_week():
     print("\nTest: Full Week")
     print("=" * 60)
 
-    scraper = TimeDocorScraper()
+    scraper = TimeDoctorScraper()
 
     try:
         today = datetime.now()

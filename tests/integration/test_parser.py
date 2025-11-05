@@ -8,8 +8,8 @@ from pathlib import Path
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-from parser import TimeDocorParser
-from transformer import TimeDocorTransformer
+from parser import TimeDoctorParser
+from transformer import TimeDoctorTransformer
 
 
 def test_parser():
@@ -29,7 +29,7 @@ def test_parser():
     print(f"✓ Loaded HTML file: {len(html)} bytes")
 
     # Parse it
-    parser = TimeDocorParser()
+    parser = TimeDoctorParser()
     entries = parser.parse_daily_report(html, "2025-11-04")
 
     print(f"✓ Parsed {len(entries)} entries")
@@ -49,7 +49,7 @@ def test_parser():
         print("-" * 60)
 
     # Transform to CSV format
-    transformer = TimeDocorTransformer()
+    transformer = TimeDoctorTransformer()
     transformed = transformer.transform_entries(entries)
 
     total_hours = transformer.calculate_total(transformed)
