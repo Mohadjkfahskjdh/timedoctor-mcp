@@ -68,6 +68,45 @@ async def get_scraper() -> TimeDoctorScraper:
     return scraper
 
 
+def process_report_html(html: str, date: str, min_hours: float = 0.1) -> tuple[list[dict], int]:
+    """
+    Process raw HTML through the complete data pipeline.
+
+    Pipeline steps:
+    1. Parse HTML to extract entries
+    2. Aggregate duplicate tasks
+    3. Transform to output format
+    4. Filter by minimum hours
+
+    Args:
+        html: Raw HTML from Time Doctor report page
+        date: Date string in YYYY-MM-DD format
+        min_hours: Minimum hours threshold for filtering (default: 0.1)
+
+    Returns:
+        tuple: (transformed_entries, filtered_count)
+            - transformed_entries: List of processed time entries
+            - filtered_count: Number of entries filtered out
+    """
+    # Step 1: Parse HTML
+    entries = parser.parse_daily_report(html, date)
+
+    # Step 2: Aggregate by task
+    entries = parser.aggregate_by_task(entries)
+
+    # Step 3: Transform entries
+    transformed = transformer.transform_entries(entries)
+
+    # Step 4: Filter by minimum hours
+    filtered_count = 0
+    if min_hours > 0:
+        original_count = len(transformed)
+        transformed = [e for e in transformed if e["hours"] >= min_hours]
+        filtered_count = original_count - len(transformed)
+
+    return transformed, filtered_count
+
+
 @app.list_tools()
 async def list_tools() -> list[Tool]:
     """List available MCP tools."""
@@ -206,27 +245,13 @@ async def handle_get_daily_report(arguments: dict) -> list[TextContent]:
         # Get scraper instance
         td_scraper = await get_scraper()
 
-        # Start browser and login
-        await td_scraper.start_browser()
-        login_success = await td_scraper.login()
+        # Use browser session context manager
+        async with td_scraper.browser_session():
+            # Get report HTML
+            html = await td_scraper.get_daily_report_html(date)
 
-        if not login_success:
-            raise Exception("Failed to login to Time Doctor")
-
-        # Get report HTML
-        html = await td_scraper.get_daily_report_html(date)
-
-        # Parse HTML
-        entries = parser.parse_daily_report(html, date)
-
-        # Aggregate by task
-        entries = parser.aggregate_by_task(entries)
-
-        # Transform to CSV format
-        transformed = transformer.transform_entries(entries)
-
-        # Close browser
-        await td_scraper.close_browser()
+            # Process through pipeline
+            transformed, _ = process_report_html(html, date, min_hours=0)
 
         # Format response
         if not transformed:
@@ -339,29 +364,32 @@ async def handle_export_weekly_csv(arguments: dict) -> list[TextContent]:
                 start_date, end_date
             )
 
-        # Parse all HTMLs
+        # Parse all HTMLs through pipeline
         all_entries = []
+        total_filtered = 0
+
         for report in all_reports:
             date_str = report["date"]
             html = report["html"]
 
             logger.info(f"Parsing data for {date_str}")
+
+            # Use data processing pipeline (but get raw entries before filtering)
             entries = parser.parse_daily_report(html, date_str)
             all_entries.extend(entries)
 
-        # Aggregate by task
+        # Aggregate all entries
         all_entries = parser.aggregate_by_task(all_entries)
 
-        # Apply min_hours filter if specified
-        entries_before_filter = len(all_entries)
-        if min_hours > 0:
-            all_entries = [e for e in all_entries if (e["seconds"] / 3600) >= min_hours]
-            logger.info(
-                f"Filtered {entries_before_filter - len(all_entries)} entries below {min_hours}h threshold"
-            )
-
-        # Calculate stats
+        # Transform and filter
         transformed = transformer.transform_entries(all_entries)
+
+        # Apply min_hours filter
+        if min_hours > 0:
+            original_count = len(transformed)
+            transformed = [e for e in transformed if e["hours"] >= min_hours]
+            total_filtered = original_count - len(transformed)
+            logger.info(f"Filtered {total_filtered} entries below {min_hours}h threshold")
         total_hours = transformer.calculate_total(transformed)
         summary = transformer.get_hours_summary(transformed)
 
@@ -380,7 +408,7 @@ async def handle_export_weekly_csv(arguments: dict) -> list[TextContent]:
             json_obj["scraping_method"] = method_name
             if min_hours > 0:
                 json_obj["min_hours_filter"] = min_hours
-                json_obj["entries_filtered"] = entries_before_filter - len(all_entries)
+                json_obj["entries_filtered"] = total_filtered
             json_data = json_lib.dumps(json_obj, indent=2, ensure_ascii=False)
 
             response = f"Time Doctor Report: {start_date} to {end_date} (JSON)\n"
@@ -389,16 +417,16 @@ async def handle_export_weekly_csv(arguments: dict) -> list[TextContent]:
 
         else:
             # CSV format (default) - with summary header
-            csv_data = entries_to_csv_string(all_entries, include_total=True)
+            csv_data = entries_to_csv_string(transformed, include_total=True)
 
             response = f"Time Doctor Report: {start_date} to {end_date}\n"
             response += "=" * 60 + "\n\n"
             response += f"Scraping method: {method_name}\n"
             response += f"Execution time: {execution_time:.2f}s\n"
             response += f"Days Retrieved: {len(all_reports)}\n"
-            response += f"Total Entries: {len(all_entries)}\n"
+            response += f"Total Entries: {len(transformed)}\n"
             if min_hours > 0:
-                response += f"Min hours filter: {min_hours}h (filtered out {entries_before_filter - len(all_entries)} entries)\n"
+                response += f"Min hours filter: {min_hours}h (filtered out {total_filtered} entries)\n"
             response += f"Total Hours: {total_hours:.2f}\n\n"
 
             # Add summary by project
@@ -431,24 +459,14 @@ async def handle_get_hours_summary(arguments: dict) -> list[TextContent]:
         # Get scraper instance
         td_scraper = await get_scraper()
 
-        # Start browser and login
-        await td_scraper.start_browser()
-        login_success = await td_scraper.login()
+        # Use browser session context manager
+        async with td_scraper.browser_session():
+            # Get report HTML
+            html = await td_scraper.get_daily_report_html(date)
 
-        if not login_success:
-            raise Exception("Failed to login to Time Doctor")
-
-        # Get report HTML
-        html = await td_scraper.get_daily_report_html(date)
-
-        # Parse HTML
-        entries = parser.parse_daily_report(html, date)
-
-        # Aggregate by task
-        entries = parser.aggregate_by_task(entries)
-
-        # Close browser
-        await td_scraper.close_browser()
+            # Process through pipeline (get raw entries for summary)
+            entries = parser.parse_daily_report(html, date)
+            entries = parser.aggregate_by_task(entries)
 
         # Get summary
         summary = get_hours_summary(entries)
@@ -484,35 +502,21 @@ async def handle_export_today_csv(arguments: dict) -> list[TextContent]:
         # Get scraper instance
         td_scraper = await get_scraper()
 
-        # Start browser and login
-        await td_scraper.start_browser()
-        login_success = await td_scraper.login()
+        # Use browser session context manager
+        async with td_scraper.browser_session():
+            # Get report HTML
+            html = await td_scraper.get_daily_report_html(today)
 
-        if not login_success:
-            raise Exception("Failed to login to Time Doctor")
-
-        # Get report HTML
-        html = await td_scraper.get_daily_report_html(today)
-
-        # Parse HTML
-        entries = parser.parse_daily_report(html, today)
-
-        # Aggregate by task
-        entries = parser.aggregate_by_task(entries)
-
-        # Close browser
-        await td_scraper.close_browser()
+            # Process through pipeline
+            transformed, _ = process_report_html(html, today, min_hours=0)
 
         # Generate CSV string
-        csv_data = entries_to_csv_string(entries, include_total=True)
-
-        # Calculate stats
-        transformed = transformer.transform_entries(entries)
+        csv_data = entries_to_csv_string(transformed, include_total=True)
         total_hours = transformer.calculate_total(transformed)
 
         response = f"Time Doctor Report: Today ({today})\n"
         response += "=" * 60 + "\n\n"
-        response += f"Total Entries: {len(entries)}\n"
+        response += f"Total Entries: {len(transformed)}\n"
         response += f"Total Hours: {total_hours:.2f}\n\n"
 
         # Add summary by project
@@ -526,7 +530,7 @@ async def handle_export_today_csv(arguments: dict) -> list[TextContent]:
         response += "CSV Data:\n\n"
         response += csv_data
 
-        logger.info(f"Successfully generated today's report ({len(entries)} entries)")
+        logger.info(f"Successfully generated today's report ({len(transformed)} entries)")
         return [TextContent(type="text", text=response)]
 
     except Exception as e:

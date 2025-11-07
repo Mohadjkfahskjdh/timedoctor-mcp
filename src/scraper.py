@@ -6,6 +6,7 @@ Handles authentication and web scraping using Playwright
 import asyncio
 import logging
 import os
+from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -26,16 +27,12 @@ try:
         BROWSER_USER_AGENT,
         BROWSER_VIEWPORT_HEIGHT,
         BROWSER_VIEWPORT_WIDTH,
-        CONTENT_LOAD_WAIT_MS,
-        DATE_NAVIGATION_WAIT_MS,
         EMAIL_SELECTOR_TIMEOUT_MS,
-        EXPAND_ALL_WAIT_MS,
         LOGIN_FORM_LOAD_WAIT_MS,
         LOGIN_NAVIGATION_TIMEOUT_MS,
         MAX_PARALLEL_SESSIONS,
         MAX_RETRY_ATTEMPTS,
         PAGE_LOAD_TIMEOUT_MS,
-        PARALLEL_THRESHOLD,
         POST_LOGIN_WAIT_MS,
         REPORT_PAGE_LOAD_WAIT_MS,
         RETRY_MAX_WAIT_SECONDS,
@@ -49,16 +46,12 @@ except ImportError:
         BROWSER_USER_AGENT,
         BROWSER_VIEWPORT_HEIGHT,
         BROWSER_VIEWPORT_WIDTH,
-        CONTENT_LOAD_WAIT_MS,
-        DATE_NAVIGATION_WAIT_MS,
         EMAIL_SELECTOR_TIMEOUT_MS,
-        EXPAND_ALL_WAIT_MS,
         LOGIN_FORM_LOAD_WAIT_MS,
         LOGIN_NAVIGATION_TIMEOUT_MS,
         MAX_PARALLEL_SESSIONS,
         MAX_RETRY_ATTEMPTS,
         PAGE_LOAD_TIMEOUT_MS,
-        PARALLEL_THRESHOLD,
         POST_LOGIN_WAIT_MS,
         REPORT_PAGE_LOAD_WAIT_MS,
         RETRY_MAX_WAIT_SECONDS,
@@ -166,6 +159,31 @@ class TimeDoctorScraper:
             logger.info("Browser closed successfully")
         except Exception as e:
             logger.error(f"Error closing browser: {e}")
+
+    @asynccontextmanager
+    async def browser_session(self):
+        """
+        Context manager for browser session lifecycle.
+        Handles browser start, login, and cleanup automatically.
+
+        Usage:
+            async with scraper.browser_session():
+                html = await scraper.get_daily_report_html(date)
+
+        Yields:
+            self: The scraper instance with browser ready and logged in
+
+        Raises:
+            Exception: If browser start or login fails
+        """
+        try:
+            await self.start_browser()
+            login_success = await self.login()
+            if not login_success:
+                raise Exception("Failed to login to Time Doctor")
+            yield self
+        finally:
+            await self.close_browser()
 
     @retry(
         stop=stop_after_attempt(MAX_RETRY_ATTEMPTS),
@@ -600,7 +618,7 @@ class TimeDoctorScraper:
             # Navigate using arrow buttons
             if days_diff > 0:
                 # Go back in time
-                for i in range(days_diff):
+                for _ in range(days_diff):
                     left_arrow = await page.query_selector(
                         'button.navigation-button:has(mat-icon:has-text("keyboard_arrow_left"))'
                     )
@@ -613,7 +631,7 @@ class TimeDoctorScraper:
             else:
                 # Go forward in time
                 days_forward = abs(days_diff)
-                for i in range(days_forward):
+                for _ in range(days_forward):
                     right_arrow = await page.query_selector(
                         'button.navigation-button:has(mat-icon:has-text("keyboard_arrow_right"))'
                     )

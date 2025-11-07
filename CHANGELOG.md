@@ -5,6 +5,40 @@ All notable changes to Time Doctor MCP will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2025-11-05
+
+### Added
+- **Browser Session Context Manager**: New `browser_session()` context manager for automatic lifecycle management
+  - Eliminates duplicate browser start/login/close code across handlers
+  - Automatic cleanup on exit (even with errors)
+  - Cleaner, more maintainable code
+  - Example: `async with scraper.browser_session(): ...`
+
+- **Data Processing Pipeline Function**: New `process_report_html()` utility function
+  - Centralizes the parse → aggregate → transform → filter pipeline
+  - Consistent processing across all handlers
+  - Single point of modification for pipeline changes
+  - Returns tuple of (transformed_entries, filtered_count)
+
+### Changed
+- **Refactored All Handlers**: Updated 4 handler functions to use new utilities
+  - `handle_get_daily_report`: Now uses context manager and pipeline (~15 lines removed)
+  - `handle_export_weekly_csv`: Uses pipeline for data processing (~10 lines removed)
+  - `handle_get_hours_summary`: Now uses context manager (~12 lines removed)
+  - `handle_export_today_csv`: Uses both context manager and pipeline (~18 lines removed)
+
+### Improved
+- **Code Duplication**: Removed ~60 lines of duplicate browser lifecycle code
+- **Code Organization**: Better separation of concerns with reusable utilities
+- **Maintainability**: Centralized logic easier to test and modify
+- **Error Handling**: Context manager ensures proper cleanup in all cases
+
+### Technical Details
+- Added `asynccontextmanager` import to scraper.py
+- Removed unused constant imports (CONTENT_LOAD_WAIT_MS, DATE_NAVIGATION_WAIT_MS, EXPAND_ALL_WAIT_MS, PARALLEL_THRESHOLD)
+- Fixed loop variable warnings (renamed `i` to `_` for unused loop variables)
+- All ruff linter checks passing
+
 ## [1.2.4] - 2025-11-05
 
 ### Fixed
